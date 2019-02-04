@@ -1,5 +1,5 @@
 import io.qameta.allure.Feature;
-import io.restassured.response.Response;
+import org.jsoup.Connection.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -9,19 +9,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static io.restassured.RestAssured.get;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
+import org.jsoup.Jsoup;
 import static org.junit.Assert.assertEquals;
 
 
-@Feature("Amazon test")
+@Feature("AutoRia JSoup test")
 @RunWith(Parameterized.class)
-public class AutoRiaRestAPITest {
+public class AutoRiaJSoupTest {
 
     private String testURL;
 
-    public AutoRiaRestAPITest(String testURL) {
+    public AutoRiaJSoupTest(String testURL) {
         this.testURL = testURL;
     }
 
@@ -43,16 +42,20 @@ public class AutoRiaRestAPITest {
     }
 
     @Test
-    public void testRestAPI() {
-        Response response = given().header("User-Agent", "Jmeter").when().get(testURL);
-        String contentType = response.header("Content-Type");
+    public void testJSoup() throws IOException {
+
+        Response response = Jsoup.connect(testURL)
+                .userAgent("Jmeter")
+                .timeout(3000)
+                .execute();
+
+        String contentType = response.contentType();
 
         assertEquals(200, response.statusCode());
         assertEquals("gzip", response.header("Content-Encoding"));
         assertThat("Unexpected Content-Type header. Expected text/html but was " + contentType,
                 contentType.contains("text/html"));
 
-        System.out.println(get(testURL).getHeaders());
     }
 
 
